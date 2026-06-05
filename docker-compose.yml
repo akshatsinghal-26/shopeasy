@@ -1,0 +1,103 @@
+version: '3.8'
+
+# ─── Networks ─────────────────────────────────────────────────────────────────
+# Services communicate using service names as hostnames
+# e.g. user-service connects to mysql:3306
+networks:
+  shopease-network:
+    driver: bridge
+
+# ─── Volumes ──────────────────────────────────────────────────────────────────
+# Persists MySQL data even when container restarts
+volumes:
+  mysql-data:
+
+# ─── Services ─────────────────────────────────────────────────────────────────
+services:
+
+  # ── MySQL Database ───────────────────────────────────────────────────────────
+  mysql:
+    image: mysql:8.0
+    container_name: shopease-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: shopease
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./services/mysql-init/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - shopease-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-ppassword"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── User Service ─────────────────────────────────────────────────────────────
+  user-service:
+    build:
+      context: ./services/user-service
+      dockerfile: Dockerfile
+    container_name: shopease-user-service
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      PORT: 3001
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: password
+      DB_NAME: shopease
+    networks:
+      - shopease-network
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  # ── Order Service ─────────────────────────────────────────────────────────────
+  order-service:
+    build:
+      context: ./services/order-service
+      dockerfile: Dockerfile
+    container_name: shopease-order-service
+    restart: unless-stopped
+    ports:
+      - "3002:3002"
+    environment:
+      PORT: 3002
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: password
+      DB_NAME: shopease
+    networks:
+      - shopease-network
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  # ── Inventory Service ─────────────────────────────────────────────────────────
+  inventory-service:
+    build:
+      context: ./services/inventory-service
+      dockerfile: Dockerfile
+    container_name: shopease-inventory-service
+    restart: unless-stopped
+    ports:
+      - "3003:3003"
+    environment:
+      PORT: 3003
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: password
+      DB_NAME: shopease
+    networks:
+      - shopease-network
+    depends_on:
+      mysql:
+        condition: service_healthy
