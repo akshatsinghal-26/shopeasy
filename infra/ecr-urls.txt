@@ -1,0 +1,6 @@
+# ShopEase ECR Image URLs
+# Region: ap-south-1
+
+USER_SERVICE=050946999289.dkr.ecr.ap-south-1.amazonaws.com/shopease/user-service:latest
+ORDER_SERVICE=050946999289.dkr.ecr.ap-south-1.amazonaws.com/shopease/order-service:latest
+INVENTORY_SERVICE=050946999289.dkr.ecr.ap-south-1.amazonaws.com/shopease/inventory-service:latest
