@@ -26,3 +26,6 @@ Thumbs.db
 
 # Jenkins
 jenkins/secrets/
+
+# Terraform tfvars (may contain sensitive values)
+*.tfvars
