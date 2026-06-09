@@ -1,0 +1,10 @@
+# ─── Namespace ────────────────────────────────────────────────────────────────
+# Isolates all ShopEase resources from other workloads
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: shopease
+  labels:
+    name: shopease
+    environment: prod
+    project: shopease

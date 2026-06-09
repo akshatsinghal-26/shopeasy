@@ -1,0 +1,17 @@
+# ─── ConfigMap ────────────────────────────────────────────────────────────────
+# Non-sensitive configuration shared across all 3 services
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: shopease-config
+  namespace: shopease
+  labels:
+    app: shopease
+    environment: prod
+data:
+  DB_HOST: "shopease-mysql.cn00w6qawqjf.ap-south-1.rds.amazonaws.com"
+  DB_PORT: "3306"
+  DB_NAME: "shopease"
+  USER_SERVICE_PORT: "3001"
+  ORDER_SERVICE_PORT: "3002"
+  INVENTORY_SERVICE_PORT: "3003"
