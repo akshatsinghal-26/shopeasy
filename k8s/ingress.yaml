@@ -1,0 +1,60 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: shopease-ingress
+  namespace: shopease
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/healthcheck-path: /health
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: "30"
+    alb.ingress.kubernetes.io/subnets: "subnet-02674ba2f716005b3,subnet-06d6bafb1abd61d71"
+  labels:
+    app: shopease
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /api/users
+            pathType: Prefix
+            backend:
+              service:
+                name: user-service
+                port:
+                  number: 80
+          - path: /health/users
+            pathType: Prefix
+            backend:
+              service:
+                name: user-service
+                port:
+                  number: 80
+          - path: /api/orders
+            pathType: Prefix
+            backend:
+              service:
+                name: order-service
+                port:
+                  number: 80
+          - path: /health/orders
+            pathType: Prefix
+            backend:
+              service:
+                name: order-service
+                port:
+                  number: 80
+          - path: /api/inventory
+            pathType: Prefix
+            backend:
+              service:
+                name: inventory-service
+                port:
+                  number: 80
+          - path: /health/inventory
+            pathType: Prefix
+            backend:
+              service:
+                name: inventory-service
+                port:
+                  number: 80
