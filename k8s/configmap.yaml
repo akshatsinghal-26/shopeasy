@@ -9,7 +9,7 @@ metadata:
     app: shopease
     environment: prod
 data:
-  DB_HOST: "shopease-mysql.cn00w6qawqjf.ap-south-1.rds.amazonaws.com"
+  DB_HOST: "shopease-mysql.cr2oy20mo3ys.ap-south-1.rds.amazonaws.com"
   DB_PORT: "3306"
   DB_NAME: "shopease"
   USER_SERVICE_PORT: "3001"
