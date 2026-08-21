@@ -9,7 +9,7 @@ metadata:
     alb.ingress.kubernetes.io/target-type: ip
     alb.ingress.kubernetes.io/healthcheck-path: /health
     alb.ingress.kubernetes.io/healthcheck-interval-seconds: "30"
-    alb.ingress.kubernetes.io/subnets: "subnet-02674ba2f716005b3,subnet-06d6bafb1abd61d71"
+    alb.ingress.kubernetes.io/subnets: "subnet-0ba9960c1e355a032,subnet-01a914d8eb8415560"
   labels:
     app: shopease
 spec:

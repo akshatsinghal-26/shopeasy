@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
         - name: inventory-service
-          image: 050946999289.dkr.ecr.ap-south-1.amazonaws.com/shopease/inventory-service:latest
+          image: 802190219686.dkr.ecr.ap-south-1.amazonaws.com/shopease/inventory-service:latest
           ports:
             - containerPort: 3003
           env:
