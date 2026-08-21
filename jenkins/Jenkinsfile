@@ -1,0 +1,85 @@
+pipeline {
+    agent any
+
+    environment {
+        AWS_REGION   = 'ap-south-1'
+        ECR_REGISTRY = "${sh(script: 'aws sts get-caller-identity --query Account --output text', returnStdout: true).trim()}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+        CLUSTER_NAME = 'shopease-cluster'
+        NAMESPACE    = 'shopease'
+        IMAGE_TAG    = "${env.GIT_COMMIT.take(7)}"
+    }
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('ECR Login') {
+            steps {
+                sh '''
+                    aws ecr get-login-password --region $AWS_REGION | \
+                    docker login --username AWS --password-stdin $ECR_REGISTRY
+                '''
+            }
+        }
+
+        stage('Build & Push Images') {
+            steps {
+                script {
+                    def services = ['user-service', 'order-service', 'inventory-service']
+                    services.each { svc ->
+                        sh """
+                            docker build -t ${ECR_REGISTRY}/shopease/${svc}:${IMAGE_TAG} ./services/${svc}
+                            docker push ${ECR_REGISTRY}/shopease/${svc}:${IMAGE_TAG}
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('Update Kubeconfig') {
+            steps {
+                sh 'aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME'
+            }
+        }
+
+        stage('Deploy to EKS') {
+            steps {
+                script {
+                    def services = ['user-service', 'order-service', 'inventory-service']
+                    services.each { svc ->
+                        sh """
+                            kubectl set image deployment/${svc} ${svc}=${ECR_REGISTRY}/shopease/${svc}:${IMAGE_TAG} -n $NAMESPACE
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('Verify Rollout') {
+            steps {
+                script {
+                    def services = ['user-service', 'order-service', 'inventory-service']
+                    services.each { svc ->
+                        sh "kubectl rollout status deployment/${svc} -n $NAMESPACE --timeout=120s"
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "✅ Deployed image tag ${IMAGE_TAG} to all 3 services in ${NAMESPACE}"
+        }
+        failure {
+            echo "❌ Pipeline failed — check console output above for the failing stage"
+        }
+        always {
+            sh 'docker logout $ECR_REGISTRY || true'
+        }
+    }
+}
